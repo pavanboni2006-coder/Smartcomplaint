@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Complaint {{ complaint.complaint_id }} - Smart Complaint System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Complaint Details</h1>
+    <a href="{{ url_for('my_complaints') }}" class="btn btn-outline">← Back to My Complaints</a>
+</div>
+
+<div class="detail-card">
+    <!-- Complaint ID & Status Header -->
+    <div class="detail-header">
+        <div>
+            <span class="complaint-id-label">Complaint ID</span>
+            <h2 class="complaint-id">{{ complaint.complaint_id }}</h2>
+        </div>
+        <span class="badge badge-{{ complaint.status | lower | replace(' ', '-') }} badge-lg">
+            {{ complaint.status }}
+        </span>
+    </div>
+
+    <!-- Complaint Information Grid -->
+    <div class="detail-grid">
+        <div class="detail-item">
+            <span class="detail-label">Title</span>
+            <span class="detail-value">{{ complaint.title }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Category</span>
+            <span class="detail-value">{{ complaint.category }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Submitted On</span>
+            <span class="detail-value">{{ complaint.created_at | strftime('%d %B %Y at %I:%M %p') }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Last Updated</span>
+            <span class="detail-value">{{ complaint.updated_at | strftime('%d %B %Y at %I:%M %p') }}</span>
+        </div>
+        {% if complaint.department_name %}
+        <div class="detail-item">
+            <span class="detail-label">Assigned Department</span>
+            <span class="detail-value">{{ complaint.department_name }}</span>
+        </div>
+        {% endif %}
+        {% if complaint.location %}
+        <div class="detail-item">
+            <span class="detail-label">Location</span>
+            <span class="detail-value">{{ complaint.location }}</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Description -->
+    <div class="detail-section">
+        <h3>Description</h3>
+        <p class="description-text">{{ complaint.description }}</p>
+    </div>
+
+    <!-- Admin Notes (if any) -->
+    {% if complaint.admin_notes %}
+    <div class="detail-section admin-notes-box">
+        <h3>📝 Admin Response</h3>
+        <p>{{ complaint.admin_notes }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Attached Photo (if any) -->
+    {% if complaint.photo %}
+    <div class="detail-section">
+        <h3>Attached Photo</h3>
+        <img src="{{ url_for('static', filename='../uploads/' + complaint.photo) }}" alt="Complaint Photo"
+            class="complaint-photo">
+    </div>
+    {% endif %}
+
+    <!-- Status Timeline -->
+    <div class="detail-section">
+        <h3>Status Timeline</h3>
+        <div class="timeline">
+            <div class="timeline-step completed">
+                <div class="timeline-dot"></div>
+                <span>Submitted</span>
+            </div>
+            <div class="timeline-step {% if complaint.status in ['In Progress', 'Resolved'] %}completed{% endif %}">
+                <div class="timeline-dot"></div>
+                <span>In Progress</span>
+            </div>
+            <div class="timeline-step {% if complaint.status == 'Resolved' %}completed{% endif %}">
+                <div class="timeline-dot"></div>
+                <span>Resolved</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

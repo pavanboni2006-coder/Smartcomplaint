@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}All Complaints - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>All Complaints 📋</h1>
+</div>
+
+<!-- ===== SEARCH & FILTER ===== -->
+<div class="filter-bar">
+    <!-- Server-side search form -->
+    <form method="GET" action="{{ url_for('admin_complaints') }}" class="search-form">
+        <input type="text" name="search" id="searchInput" class="form-control search-input"
+            placeholder="🔍 Search by ID, title, user, category..." value="{{ search }}">
+        <select name="status" class="form-control filter-select">
+            <option value="all" {% if status_filter=='all' %}selected{% endif %}>All Status</option>
+            <option value="Pending" {% if status_filter=='Pending' %}selected{% endif %}>Pending</option>
+            <option value="In Progress" {% if status_filter=='In Progress' %}selected{% endif %}>In Progress</option>
+            <option value="Resolved" {% if status_filter=='Resolved' %}selected{% endif %}>Resolved</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="{{ url_for('admin_complaints') }}" class="btn btn-outline">Reset</a>
+    </form>
+</div>
+
+<!-- ===== COMPLAINTS TABLE ===== -->
+{% if complaints %}
+<div class="table-container">
+    <table class="data-table" id="adminComplaintsTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Complaint ID</th>
+                <th>User</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Department</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in complaints %}
+            <tr>
+                <td>{{ c.id }}</td>
+                <td><code>{{ c.complaint_id }}</code></td>
+                <td>{{ c.user_name }}</td>
+                <td>{{ c.title[:35] }}{% if c.title|length > 35 %}...{% endif %}</td>
+                <td>{{ c.category }}</td>
+                <td>{{ c.department_name or 'Unassigned' }}</td>
+                <td>
+                    <span class="badge badge-{{ c.status | lower | replace(' ', '-') }}">
+                        {{ c.status }}
+                    </span>
+                </td>
+                <td>{{ c.created_at | strftime('%d %b %Y') }}</td>
+                <td class="action-cell">
+                    <!-- Update Button -->
+                    <a href="{{ url_for('admin_update', complaint_id=c.id) }}" class="btn btn-sm btn-primary">✏️
+                        Update</a>
+
+                    <!-- Delete Button (uses POST form to prevent CSRF-like GET delete) -->
+                    <form action="{{ url_for('admin_delete', complaint_id=c.id) }}" method="POST"
+                        style="display:inline;"
+                        onsubmit="return confirm('Delete this complaint? This cannot be undone.')">
+                        <button type="submit" class="btn btn-sm btn-danger">🗑️ Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<p class="record-count">Total: {{ complaints|length }} complaints</p>
+{% else %}
+<div class="empty-state">
+    <p>📭 No complaints found matching your criteria.</p>
+    <a href="{{ url_for('admin_complaints') }}" class="btn btn-outline">Clear Filters</a>
+</div>
+{% endif %}
+{% endblock %}

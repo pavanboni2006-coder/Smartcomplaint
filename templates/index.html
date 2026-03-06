@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Home - Smart Complaint System{% endblock %}
+
+{% block content %}
+<!-- ===== HERO SECTION ===== -->
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">Smart Complaint<br>Management System</h1>
+        <p class="hero-subtitle">
+            Submit your complaints online. Track their status in real-time.<br>
+            Your voice matters — we make sure it's heard.
+        </p>
+        <div class="hero-buttons">
+            <a href="{{ url_for('register') }}" class="btn btn-primary">Get Started</a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline">Login</a>
+        </div>
+    </div>
+    <div class="hero-graphic">
+        <div class="hero-emoji">📋</div>
+    </div>
+</section>
+
+<!-- ===== FEATURES SECTION ===== -->
+<section class="features">
+    <h2 class="section-title">How It Works</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">📝</div>
+            <h3>Submit Complaint</h3>
+            <p>Fill a simple form with your complaint details and get a unique tracking ID instantly.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🔍</div>
+            <h3>Track Status</h3>
+            <p>Monitor your complaint status — Pending, In Progress, or Resolved — in real time.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🏢</div>
+            <h3>Department Assignment</h3>
+            <p>Admins assign complaints to the right department for faster resolution.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Reports & Analytics</h3>
+            <p>Detailed reports on complaint categories and resolution rates for administrators.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ===== CATEGORIES SECTION ===== -->
+<section class="categories-section">
+    <h2 class="section-title">Complaint Categories</h2>
+    <div class="categories-grid">
+        <span class="category-badge">🛣️ Road</span>
+        <span class="category-badge">💧 Water</span>
+        <span class="category-badge">⚡ Electricity</span>
+        <span class="category-badge">🏫 College</span>
+        <span class="category-badge">🏥 Health</span>
+        <span class="category-badge">🚮 Sanitation</span>
+        <span class="category-badge">🛡️ Safety</span>
+        <span class="category-badge">🏛️ Administration</span>
+    </div>
+</section>
+
+<!-- ===== CALL TO ACTION ===== -->
+<section class="cta-section">
+    <h2>Ready to Submit Your Complaint?</h2>
+    <p>Register for free and start managing your complaints today.</p>
+    <a href="{{ url_for('register') }}" class="btn btn-primary">Register Now</a>
+</section>
+{% endblock %}

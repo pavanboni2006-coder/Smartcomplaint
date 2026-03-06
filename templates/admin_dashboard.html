@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard - Smart Complaint System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Admin Dashboard 🛡️</h1>
+    <p>Welcome, <strong>{{ session['admin_name'] }}</strong> | Manage all complaints here</p>
+</div>
+
+<!-- ===== STATS CARDS ===== -->
+<div class="stats-grid">
+    <div class="stat-card stat-total">
+        <div class="stat-icon">📋</div>
+        <div class="stat-info">
+            <span class="stat-number">{{ total }}</span>
+            <span class="stat-label">Total Complaints</span>
+        </div>
+    </div>
+    <div class="stat-card stat-pending">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-info">
+            <span class="stat-number">{{ pending }}</span>
+            <span class="stat-label">Pending</span>
+        </div>
+    </div>
+    <div class="stat-card stat-progress">
+        <div class="stat-icon">🔄</div>
+        <div class="stat-info">
+            <span class="stat-number">{{ in_progress }}</span>
+            <span class="stat-label">In Progress</span>
+        </div>
+    </div>
+    <div class="stat-card stat-resolved">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+            <span class="stat-number">{{ resolved }}</span>
+            <span class="stat-label">Resolved</span>
+        </div>
+    </div>
+</div>
+
+<!-- ===== USERS COUNT CARD ===== -->
+<div class="info-banner">
+    <span>👥 Total Registered Users: <strong>{{ total_users }}</strong></span>
+    <div class="banner-actions">
+        <a href="{{ url_for('admin_complaints') }}" class="btn btn-primary btn-sm">View All Complaints</a>
+        <a href="{{ url_for('admin_report') }}" class="btn btn-outline btn-sm">📊 View Report</a>
+    </div>
+</div>
+
+<!-- ===== RECENT COMPLAINTS ===== -->
+<div class="card">
+    <div class="card-header">
+        <h3>Recent Complaints</h3>
+        <a href="{{ url_for('admin_complaints') }}" class="btn btn-sm btn-outline">View All</a>
+    </div>
+    {% if recent %}
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Complaint ID</th>
+                    <th>User</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in recent %}
+                <tr>
+                    <td><code>{{ c.complaint_id }}</code></td>
+                    <td>{{ c.user_name }}</td>
+                    <td>{{ c.title[:40] }}{% if c.title|length > 40 %}...{% endif %}</td>
+                    <td>{{ c.category }}</td>
+                    <td>
+                        <span class="badge badge-{{ c.status | lower | replace(' ', '-') }}">
+                            {{ c.status }}
+                        </span>
+                    </td>
+                    <td>{{ c.created_at | strftime('%d %b %Y') }}</td>
+                    <td>
+                        <a href="{{ url_for('admin_update', complaint_id=c.id) }}"
+                            class="btn btn-sm btn-primary">Update</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>📭 No complaints in the system yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

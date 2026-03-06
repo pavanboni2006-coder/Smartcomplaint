@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!--
+    base.html - Base template inherited by all pages
+    Contains: navbar, flash messages, footer
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smart Complaint System{% endblock %}</title>
+    <!-- Main stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar">
+    <div class="nav-brand">
+        <span class="brand-icon">📋</span>
+        <a href="{{ url_for('index') }}" class="brand-text">SmartComplaint</a>
+    </div>
+    <ul class="nav-links">
+        {% if session.get('user_id') %}
+            <!-- Logged-in user links -->
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('submit_complaint') }}">Submit Complaint</a></li>
+            <li><a href="{{ url_for('my_complaints') }}">My Complaints</a></li>
+            <li><a href="{{ url_for('logout') }}" class="btn-nav">Logout ({{ session['user_name'] }})</a></li>
+        {% elif session.get('admin_id') %}
+            <!-- Admin links -->
+            <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('admin_complaints') }}">All Complaints</a></li>
+            <li><a href="{{ url_for('admin_report') }}">Report</a></li>
+            <li><a href="{{ url_for('admin_logout') }}" class="btn-nav">Logout (Admin)</a></li>
+        {% else %}
+            <!-- Guest links -->
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            <li><a href="{{ url_for('register') }}" class="btn-nav">Register</a></li>
+            <li><a href="{{ url_for('admin_login') }}">Admin</a></li>
+        {% endif %}
+    </ul>
+</nav>
+
+<!-- ===== FLASH MESSAGES ===== -->
+<!-- Flash messages are set via flash() in Python and shown here -->
+<div class="flash-container" id="flash-container">
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">
+                    {{ message }}
+                    <button class="flash-close" onclick="this.parentElement.remove()">✕</button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="main-content">
+    {% block content %}{% endblock %}
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+    <p>© 2024 Smart Complaint Management System | College Mini Project</p>
+</footer>
+
+<!-- Main JavaScript file -->
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

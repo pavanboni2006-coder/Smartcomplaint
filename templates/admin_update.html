@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Update Complaint - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Update Complaint ✏️</h1>
+    <a href="{{ url_for('admin_complaints') }}" class="btn btn-outline">← Back to All Complaints</a>
+</div>
+
+<!-- ===== COMPLAINT INFO (read-only) ===== -->
+<div class="info-banner">
+    <span><strong>Complaint ID:</strong> {{ complaint.complaint_id }}</span>
+    <span><strong>User:</strong> {{ complaint.user_name }}</span>
+    <span><strong>Category:</strong> {{ complaint.category }}</span>
+    <span><strong>Submitted:</strong> {{ complaint.created_at | strftime('%d %b %Y') }}</span>
+</div>
+
+<!-- Original complaint details shown for context -->
+<div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+        <h3>Original Complaint</h3>
+    </div>
+    <div style="padding: 1.2rem;">
+        <h4>{{ complaint.title }}</h4>
+        <p>{{ complaint.description }}</p>
+        {% if complaint.location %}
+        <p><strong>Location:</strong> {{ complaint.location }}</p>
+        {% endif %}
+        {% if complaint.photo %}
+        <p><strong>Attached Photo:</strong> {{ complaint.photo }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ===== UPDATE FORM ===== -->
+<div class="form-card">
+    <h3>Admin Action</h3>
+    <form action="{{ url_for('admin_update', complaint_id=complaint.id) }}" method="POST">
+
+        <!-- Status Update -->
+        <div class="form-group">
+            <label for="status">Update Status <span class="required">*</span></label>
+            <select id="status" name="status" class="form-control" required>
+                <option value="Pending" {% if complaint.status=='Pending' %}selected{% endif %}>
+                    ⏳ Pending
+                </option>
+                <option value="In Progress" {% if complaint.status=='In Progress' %}selected{% endif %}>
+                    🔄 In Progress
+                </option>
+                <option value="Resolved" {% if complaint.status=='Resolved' %}selected{% endif %}>
+                    ✅ Resolved
+                </option>
+            </select>
+        </div>
+
+        <!-- Assign to Department -->
+        <div class="form-group">
+            <label for="department_id">Assign to Department</label>
+            <select id="department_id" name="department_id" class="form-control">
+                <option value="">-- Not Assigned --</option>
+                {% for dept in departments %}
+                <option value="{{ dept.id }}" {% if complaint.department_id==dept.id %}selected{% endif %}>
+                    {{ dept.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Admin Notes / Response -->
+        <div class="form-group">
+            <label for="admin_notes">Admin Notes / Response</label>
+            <textarea id="admin_notes" name="admin_notes" class="form-control" rows="4" maxlength="1000"
+                placeholder="Add any notes or response for the user...">{{ complaint.admin_notes or '' }}</textarea>
+        </div>
+
+        <!-- Form Buttons -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{{ url_for('admin_complaints') }}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}My Complaints - Smart Complaint System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My Complaints 📋</h1>
+</div>
+
+<!-- ===== SEARCH & FILTER BAR ===== -->
+<div class="filter-bar">
+    <!-- Search input (JS-powered live search) -->
+    <input type="text" id="searchInput" class="form-control search-input"
+        placeholder="🔍 Search by ID, title, category...">
+
+    <!-- Status filter dropdown -->
+    <div class="filter-group">
+        <label>Filter by Status:</label>
+        <div class="filter-buttons">
+            <a href="{{ url_for('my_complaints', status='all') }}"
+                class="btn btn-sm {% if status_filter == 'all' %}btn-primary{% else %}btn-outline{% endif %}">All</a>
+            <a href="{{ url_for('my_complaints', status='Pending') }}"
+                class="btn btn-sm {% if status_filter == 'Pending' %}btn-warning{% else %}btn-outline{% endif %}">Pending</a>
+            <a href="{{ url_for('my_complaints', status='In Progress') }}"
+                class="btn btn-sm {% if status_filter == 'In Progress' %}btn-info{% else %}btn-outline{% endif %}">In
+                Progress</a>
+            <a href="{{ url_for('my_complaints', status='Resolved') }}"
+                class="btn btn-sm {% if status_filter == 'Resolved' %}btn-success{% else %}btn-outline{% endif %}">Resolved</a>
+        </div>
+    </div>
+</div>
+
+<!-- ===== COMPLAINTS LIST ===== -->
+{% if complaints %}
+<div class="table-container">
+    <table class="data-table" id="complaintsTable">
+        <thead>
+            <tr>
+                <th>Complaint ID</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in complaints %}
+            <tr class="complaint-row">
+                <td><code>{{ c.complaint_id }}</code></td>
+                <td>{{ c.title }}</td>
+                <td>{{ c.category }}</td>
+                <td>
+                    <span class="badge badge-{{ c.status | lower | replace(' ', '-') }}">
+                        {{ c.status }}
+                    </span>
+                </td>
+                <td>{{ c.created_at | strftime('%d %b %Y') }}</td>
+                <td>
+                    <a href="{{ url_for('complaint_detail', complaint_id=c.complaint_id) }}"
+                        class="btn btn-sm btn-outline">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<p class="record-count" id="record-count">Showing {{ complaints|length }} complaints</p>
+{% else %}
+<div class="empty-state">
+    <p>📭 No complaints found.</p>
+    <a href="{{ url_for('submit_complaint') }}" class="btn btn-primary">Submit a Complaint</a>
+</div>
+{% endif %}
+{% endblock %}

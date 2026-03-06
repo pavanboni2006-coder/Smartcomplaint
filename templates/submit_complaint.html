@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Submit Complaint - Smart Complaint System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Submit a Complaint 📝</h1>
+    <p>Fill the form below. You'll receive a unique complaint ID for tracking.</p>
+</div>
+
+<div class="form-card">
+    <!-- 
+        enctype="multipart/form-data" is required for file uploads.
+        Without it, the photo field will not be sent to the server.
+    -->
+    <form action="{{ url_for('submit_complaint') }}" method="POST" enctype="multipart/form-data" id="complaintForm">
+
+        <!-- Complaint Title -->
+        <div class="form-group">
+            <label for="title">Complaint Title <span class="required">*</span></label>
+            <input type="text" id="title" name="title" class="form-control"
+                placeholder="Brief one-line summary of your complaint" required maxlength="200">
+        </div>
+
+        <!-- Category Dropdown -->
+        <div class="form-group">
+            <label for="category">Category <span class="required">*</span></label>
+            <select id="category" name="category" class="form-control" required>
+                <option value="">-- Select a Category --</option>
+                <option value="Road">🛣️ Road & Infrastructure</option>
+                <option value="Water">💧 Water Supply</option>
+                <option value="Electricity">⚡ Electricity</option>
+                <option value="College">🏫 College / Education</option>
+                <option value="Health">🏥 Health & Medical</option>
+                <option value="Sanitation">🚮 Sanitation & Waste</option>
+                <option value="Safety">🛡️ Public Safety</option>
+                <option value="Administration">🏛️ General Administration</option>
+                <option value="Other">📌 Other</option>
+            </select>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+            <label for="description">Description <span class="required">*</span></label>
+            <textarea id="description" name="description" class="form-control" rows="5"
+                placeholder="Describe your complaint in detail..." required minlength="20" maxlength="2000"></textarea>
+            <!-- Character counter shown by JS -->
+            <small id="desc-counter" class="text-muted">0 / 2000 characters</small>
+        </div>
+
+        <!-- File Upload & Location (Side by Side) -->
+        <div class="form-row" style="display: flex; gap: 20px;">
+            <!-- Photo Upload (optional) -->
+            <div class="form-group" style="flex: 1;">
+                <label for="photo">Attach Photo <span class="optional">(optional)</span></label>
+                <input type="file" id="photo" name="photo" class="form-control-file" accept=".png,.jpg,.jpeg,.gif,.pdf">
+                <small class="text-muted">Allowed: PNG, JPG, JPEG, GIF, PDF. Max size: 5 MB</small>
+                <!-- File name preview shown by JS -->
+                <div id="file-preview" class="file-preview" style="display:none;"></div>
+            </div>
+
+            <!-- Location -->
+            <div class="form-group" style="flex: 1;">
+                <label for="location">Location <span class="optional">(optional)</span></label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="location" name="location" class="form-control"
+                        placeholder="Enter address or get GPS" style="flex: 1;">
+                    <button type="button" id="btn-gps" class="btn btn-outline" style="white-space: nowrap;">📍 Get GPS
+                        Location</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Submit Complaint</button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const gpsBtn = document.getElementById("btn-gps");
+        const locInput = document.getElementById("location");
+
+        if (gpsBtn && locInput) {
+            gpsBtn.addEventListener("click", function () {
+                gpsBtn.textContent = "📍 Fetching...";
+                gpsBtn.disabled = true;
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function (position) {
+                            const lat = position.coords.latitude.toFixed(6);
+                            const lon = position.coords.longitude.toFixed(6);
+                            locInput.value = lat + ", " + lon;
+                            gpsBtn.textContent = "📍 Get GPS Location";
+                            gpsBtn.disabled = false;
+                        },
+                        function (error) {
+                            alert("Error getting location: " + error.message);
+                            gpsBtn.textContent = "📍 Get GPS Location";
+                            gpsBtn.disabled = false;
+                        }
+                    );
+                } else {
+                    alert("Geolocation is not supported by this browser.");
+                    gpsBtn.textContent = "📍 Get GPS Location";
+                    gpsBtn.disabled = false;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

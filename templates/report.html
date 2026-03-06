@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Complaint Report - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📊 Complaint Report</h1>
+    <p>Summary of all complaints in the system</p>
+</div>
+
+<!-- ===== OVERALL SUMMARY ===== -->
+<div class="stats-grid">
+    <div class="stat-card stat-total">
+        <div class="stat-icon">📋</div>
+        <div class="stat-info">
+            <span class="stat-number">{{ grand_total }}</span>
+            <span class="stat-label">Total Complaints</span>
+        </div>
+    </div>
+    <div class="stat-card stat-resolved">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+            <span class="stat-number">{{ grand_resolved }}</span>
+            <span class="stat-label">Total Resolved</span>
+        </div>
+    </div>
+    <div class="stat-card stat-pending">
+        <div class="stat-icon">📈</div>
+        <div class="stat-info">
+            {% if grand_total > 0 %}
+            <span class="stat-number">{{ ((grand_resolved / grand_total) * 100) | round(1) }}%</span>
+            {% else %}
+            <span class="stat-number">0%</span>
+            {% endif %}
+            <span class="stat-label">Resolution Rate</span>
+        </div>
+    </div>
+</div>
+
+<!-- ===== COMPLAINTS BY CATEGORY ===== -->
+<div class="card">
+    <div class="card-header">
+        <h3>Complaints by Category</h3>
+    </div>
+    {% if by_category %}
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Total</th>
+                    <th>Pending</th>
+                    <th>In Progress</th>
+                    <th>Resolved</th>
+                    <th>Progress Bar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in by_category %}
+                <tr>
+                    <td><strong>{{ row.category }}</strong></td>
+                    <td>{{ row.total }}</td>
+                    <td><span class="badge badge-pending">{{ row.pending or 0 }}</span></td>
+                    <td><span class="badge badge-in-progress">{{ row.in_progress or 0 }}</span></td>
+                    <td><span class="badge badge-resolved">{{ row.resolved or 0 }}</span></td>
+                    <td>
+                        <!-- CSS-based progress bar showing resolution % -->
+                        <div class="progress-bar-container">
+                            {% set pct = ((row.resolved or 0) / row.total * 100) | round(0) if row.total > 0 else 0 %}
+                            <div class="progress-bar" data-width="{{ pct }}%"></div>
+                            <span class="progress-label">{{ pct }}%</span>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No complaint data available yet.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ===== COMPLAINTS BY DEPARTMENT ===== -->
+<div class="card">
+    <div class="card-header">
+        <h3>Complaints by Department</h3>
+    </div>
+    {% if by_department %}
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Department</th>
+                    <th>Total Assigned</th>
+                    <th>Resolved</th>
+                    <th>Resolution Rate</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in by_department %}
+                <tr>
+                    <td>{{ row.dept_name }}</td>
+                    <td>{{ row.total }}</td>
+                    <td>{{ row.resolved or 0 }}</td>
+                    <td>
+                        <div class="progress-bar-container">
+                            {% set pct = ((row.resolved or 0) / row.total * 100) | round(0) if row.total > 0 else 0 %}
+                            <div class="progress-bar" data-width="{{ pct }}%"></div>
+                            <span class="progress-label">{{ pct }}%</span>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No department data available yet.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Print Button -->
+<div style="text-align:center; margin: 2rem 0;">
+    <button onclick="window.print()" class="btn btn-outline">🖨️ Print Report</button>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary">← Dashboard</a>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll('.progress-bar').forEach(function (el) {
+            if (el.dataset.width) {
+                el.style.width = el.dataset.width;
+            }
+        });
+    });
+</script>
+{% endblock %}
