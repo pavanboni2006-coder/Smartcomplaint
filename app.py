@@ -18,12 +18,23 @@ import string
 import sqlite3
 from functools import wraps
 from datetime import datetime                # For converting SQLite timestamp strings
+from flask_mail import Mail, Message
 
 # ============================================================
 # App Configuration
 # ============================================================
 app = Flask(__name__)
 
+# ---- Mail Configuration ----
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USER', 'your_email@gmail.com')
+app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASS', 'your_app_password')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('EMAIL_USER', 'your_email@gmail.com')
+
+mail = Mail(app)
 # Secret key for session management
 app.secret_key = 'smart_complaint_secret_key_2024'
 
@@ -353,6 +364,34 @@ def submit_complaint():
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (complaint_id, uid, title, description, category, photo_filename, location), commit=True)
 
+        # --------------------------------------------------------
+        # Send Email Notification to Admin
+        # --------------------------------------------------------
+        admin_email = app.config['MAIL_USERNAME']
+        user_name = session.get('user_name', 'Unknown User')
+        
+        msg = Message("New Complaint Submitted", recipients=[admin_email])
+        msg.body = f"""Hello Admin,
+
+A new complaint has been submitted.
+
+Complaint ID: {complaint_id}
+Submitted By: {user_name}
+Category/Department: {category}
+Issue/Title: {title}
+Description: {description}
+
+Please log in to the admin panel to review and update the status.
+
+Thank you,
+Smart Complaint System
+"""
+        try:
+            mail.send(msg)
+        except Exception as e:
+            print(f"Error sending admin email: {e}")
+        # --------------------------------------------------------
+
         flash(f'Complaint submitted! Your ID: {complaint_id}', 'success')
         return redirect(url_for('my_complaints'))
 
@@ -489,12 +528,43 @@ def admin_update(complaint_id):
         dept_id     = request.form.get('department_id') or None
         admin_notes = request.form.get('admin_notes', '').strip()
 
+        # Fetch old complaint to check if status changed, and to get user email
+        old_complaint = query_db("""
+            SELECT c.*, u.email, u.name as user_name
+            FROM complaints c
+            JOIN users u ON c.user_id = u.id
+            WHERE c.id = ?
+        """, (complaint_id,), one=True)
+
         query_db("""
             UPDATE complaints
             SET status=?, department_id=?, admin_notes=?,
                 updated_at=CURRENT_TIMESTAMP
             WHERE id=?
         """, (new_status, dept_id, admin_notes, complaint_id), commit=True)
+        
+        # Send Email Notification
+        if old_complaint and old_complaint['status'] != new_status:
+            admin_email = app.config['MAIL_USERNAME']
+            user_name = old_complaint['user_name']
+            c_id = old_complaint['complaint_id']
+            title = old_complaint['title']
+            
+            msg = Message("Complaint Status Updated", recipients=[admin_email])
+            msg.body = f"""Hello Admin,
+
+The complaint regarding "{title}" from user {user_name} has been updated.
+
+Complaint ID: {c_id}
+New Status: {new_status}
+
+Thank you,
+Smart Complaint System
+"""
+            try:
+                mail.send(msg)
+            except Exception as e:
+                print(f"Error sending email: {e}")
 
         flash('Complaint updated successfully.', 'success')
         return redirect(url_for('admin_complaints'))
